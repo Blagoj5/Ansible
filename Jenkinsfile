@@ -6,7 +6,7 @@ pipeline {
         stage('Copying') {
 		steps {
                 
-			bash /tmp/autoscript.sh
+			sh /tmp/autoscript.sh
                 }
           }
 
