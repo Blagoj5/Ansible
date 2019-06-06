@@ -6,8 +6,8 @@ pipeline {
         stage('Copying') {
 	
 		steps {
-			sh "echo "Starting to copy""
-	}
+			echo "Starting to copy"
+		}
 		
 
 		steps {
