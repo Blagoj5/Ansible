@@ -5,14 +5,13 @@ pipeline {
 
         stage('Copying') {
 	
-		steps {
-			echo "Starting to copy"
-		}
 		
 
 		steps {
-                
-			sh "bash /tmp/autoscript.sh"
+		
+                        echo "Starting to copy"
+
+			sh 'bash /tmp/autoscript.sh'
                 }
           }
 
