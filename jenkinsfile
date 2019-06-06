@@ -2,20 +2,17 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
-            steps {
-                echo 'Building..'
+
+        stage('Copying') {
+            	steps {
+			echo "Starting script"
+		}
+
+		steps {
+                
+			bash /tmp/autoscript.sh
             }
         }
-        stage('Test') {
-            steps {
-                echo 'Testing..'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying....'
-            }
-        }
-    }
+
+}
 }
