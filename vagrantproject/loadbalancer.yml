@@ -1,0 +1,30 @@
+---
+- hosts: loadbalancer
+  become: true
+  tasks:
+    - name: install tools
+      apt: name=python-httplib2 state=present
+     # with_items:
+      #    -python-httplib2
+
+    #- name: Add epel-release repo
+    #  apt:
+    #    name: epel-release
+    #    state: present
+
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Make sure nginx is running
+      service: name=nginx state=started enabled=yes
+
+    - name: Configure nginx as loadbalancer
+      copy: src=/home/vagrant/gitrepos/Test/nginxproxy.conf dest=/etc/nginx/conf.d/ 
+      notify: restarting nginx
+
+
+  handlers:
+    - name: restarting nginx
+      service: name=nginx state=restarted
