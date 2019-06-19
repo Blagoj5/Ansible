@@ -1,0 +1,15 @@
+---
+- name: install tools
+  apt: name=python-httplib2 state=present
+     
+- name: Install nginx
+  apt:  
+    name: nginx
+    state: present
+
+- name: Make sure nginx is running
+  service: name=nginx state=started enabled=yes
+
+- name: Configure nginx as loadbalancer
+  copy: src=nginxproxy.conf dest=/etc/nginx/conf.d/ 
+  notify: restarting nginx
