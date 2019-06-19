@@ -1,0 +1,29 @@
+---
+- name: install tools
+  apt: name=python-httplib2 state=present
+  tags: [ 'packages' ]
+     
+- name: Install nginx
+  apt:  
+    name: nginx
+    state: present
+
+- name: Make sure nginx is running
+  service: name=nginx state=started enabled=yes
+
+- name: get active status
+  shell: ls -1 /etc/nginx/conf.d/
+  register: active
+  
+- name: de-activate default nginx site AND sites
+  file: path=/etc/nginx/conf.d/{{ item }} state=absent
+  with_items: active.stdout_lines
+  when: item not in sites
+  notify: restarting nginx 
+  
+
+- name: Configure nginx as loadbalancer
+  template: src=nginxproxy.conf.j2 dest=/etc/nginx/conf.d/{{ item.key }}.conf 
+  with_dict: "{{ sites }}"
+  notify: restarting nginx
+
