@@ -1,0 +1,5 @@
+---
+sites:
+  myapp01:
+    frontend: 80
+    backend: 80

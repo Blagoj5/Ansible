@@ -1,0 +1,24 @@
+---
+- name: install tools
+  apt: name={{item}} state=present update_cache=yes
+  with_items:
+      - python-mysqldb
+      - mysql-server
+
+- name: install mysql-server
+  apt: name=mysql-server state=present update_cache=yes
+
+- name: ensure mysql listening on the right port
+  lineinfile: dest=/etc/mysql/mysql.conf.d/mysqld.cnf regexp=^bind-address
+              line="bind-address = {{ ansible_enp0s8.ipv4.address }}" #it doesnt listen to bind 0.0.0.0, instead we set it up 
+  notify: restart mysql                        #DYNAMIC VARIABLE      #to listen to our apache ip adress [ansible -m setup HOSTNAME]
+
+- name: ensure mysql started
+  service: name=mysql state=started enabled=yes  
+
+- name: create demo database
+  mysql_db: name={{ db_name }} state=present 
+
+- name: create demo user
+  mysql_user: name={{ db_user_name }} password={{ db_user_password }} priv={{ db_name }}.*:ALL 
+              host='{{ db_user_host }}' state=present

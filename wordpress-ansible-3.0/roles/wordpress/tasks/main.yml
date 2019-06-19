@@ -1,0 +1,66 @@
+---
+- name: install web components
+  apt: name={{item}} state=present update_cache=yes
+  with_items:
+    - python-pip
+    - python-virtualenv
+    - python-mysqldb
+    - php
+    - libapache2-mod-php
+    - php-mysql
+
+- name: de-activate default apache site
+  file: path=/etc/apache2/sites-enabled/000-default.conf state=absent
+  notify: restart apache2
+
+# IF CENTOS7, BECUASE INCLuDE OPTIONAL IS NOT DEFINED IN IT SO IT DOESNT READ FROM THE site-enabled file
+# - name: Copy the apache2 main config
+#  copy: src=/home/vagrant/gitrepos/Test/httpd.conf dest=/etc/apache2/conf/
+#  notify: restart apache2
+
+# - name: Making sure /var/www/html folder exists
+#   command: mkdir -p /var/www/html  
+
+# - name: copy demo source
+#  copy: src=/home/vagrant/gitrepos/Test/apache2setup/index.html dest=/var/www/html/ mode=0755
+#  notify: restart apache2
+
+- name: Download wordpress
+  get_url:
+      url: https://wordpress.org/latest.tar.gz
+      dest: /tmp
+    
+- name: Unarchive wordpress to /var/www
+  unarchive:
+      src: /tmp/wordpress-5.2.2.tar.gz
+      dest: /var/www/
+      remote_src: yes  
+
+- name: Change the name of the .php
+  command: cp /var/www/wordpress/wp-config-sample.php /var/www/wordpress/wp-config.php
+
+- name: Adding the right wordpress config
+  template: src=wp-config.php.j2 dest=/var/www/wordpress/wp-config.php mode=0755
+  notify: restart apache2
+
+- name: Updating the dir.conf , adding wp-config.php in index
+  lineinfile: dest=/etc/apache2/mods-enabled/dir.conf regexp=^	DirectoryIndex line="DirectoryIndex wp-config.php index.html index.cgi index.pl index.php index.xhtml index.htm"
+
+#- name: copy the apache2-site config
+#  copy: src=/home/vagrant/gitrepos/Test/apache2setup/ostechnix1.lan.conf dest=/etc/apache2/sites-available/
+#  notify: restart apache2
+
+- name: copy the wordpress-site config
+  copy: src=wordpress-conf.conf dest=/etc/apache2/sites-available/
+  notify: restart apache2
+
+# - name: de-activate other apache sites
+#   file: path=/etc/apache2/sites-enabled/ostechnix1.lan.conf state=absent
+#   notify: restart apache2
+
+- name: Making sure sites-enabled exists
+  command: mkdir -p /etc/apache2/sites-enabled
+
+- name: create a symbolic link
+  file: src=/etc/apache2/sites-available/wordpress-conf.conf dest=/etc/apache2/sites-enabled/wordpress-conf.conf state=link
+  notify: restart apache2
